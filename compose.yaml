@@ -1,0 +1,26 @@
+services:
+  dev:
+    build:
+      context: "./"
+      dockerfile: "dev.Dockerfile"
+    ports:
+      - "4045:4045"
+    volumes:
+      - ./cmd:/app/cmd
+      - ./internal:/app/internal
+      - ./Makefile:/app/Makefile
+    tty: true
+    profiles:
+      - dev
+
+  prod:
+    build:
+      context: "./"
+      dockerfile: "prod.Dockerfile"
+    ports:
+      - "4045:4045"
+    entrypoint: bin/grabjobs -port 4045 -db 'res/location_data.csv'
+    command: go build -o bin/grabjobs ./cmd/api/*.go
+    restart: unless-stopped
+    profiles:
+      - production
