@@ -14,13 +14,15 @@ services:
       - dev
 
   prod:
-    build:
-      context: "./"
-      dockerfile: "prod.Dockerfile"
+    image: "ercross/grabjobs:latest"
+
+    # uncomment build to build image locally
+    # https://docs.docker.com/compose/compose-file/#pull_policy
+    #build:
+      #context: "./"
+      #dockerfile: "prod.Dockerfile"
     ports:
       - "4045:4045"
-    entrypoint: bin/grabjobs -port 4045 -db 'res/location_data.csv'
-    command: go build -o bin/grabjobs ./cmd/api/*.go
-    restart: unless-stopped
+    entrypoint: ./bin/grabjobs -port 4045 -db 'res/location_data.csv'
     profiles:
       - production

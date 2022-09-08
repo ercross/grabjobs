@@ -2,10 +2,10 @@ FROM golang:1.17-bullseye
 
 WORKDIR /app
 
-RUN mkdir "bin"
-
 COPY . /app
 
-RUN ls -al
+RUN mkdir "bin"
+
+RUN go build -o ./bin/grabjobs ./cmd/api/*.go
 
 EXPOSE 4045
