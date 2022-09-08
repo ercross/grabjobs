@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"github.com/ercross/grabjobs/internal/models"
+	"github.com/ercross/grabjobs/internal/models/rtree"
 	"log"
 	"os"
 	"strconv"
@@ -19,6 +20,8 @@ type DB struct {
 	// Alternatively, this indexing could be done with any
 	// standard geospatial based DBMS.
 	titleJobs map[string][]models.Job
+
+	index *rtree.RTree
 }
 
 // Initialize initializes the DB.
@@ -36,8 +39,9 @@ func Initialize(filepath string) (*DB, error) {
 		return nil, fmt.Errorf("error encountered reading file on path %s : %v", filepath, err)
 	}
 
-	db := loadTitleJobs(removeTitleLine(lines))
+	db, jobs := loadTitleJobs(removeTitleLine(lines))
 	db.lock = new(sync.RWMutex)
+	db.index, _ = rtree.NewWithEntries(jobs...)
 	return db, nil
 }
 
@@ -70,11 +74,12 @@ func removeTitleLine(lines [][]string) [][]string {
 // loadTitleJobs reads job on each line of lines into DB.
 // Each line in lines must contain job title, longitude, latitude
 // in that order of indexing
-func loadTitleJobs(lines [][]string) *DB {
-	jobs := make(map[string][]models.Job)
+func loadTitleJobs(lines [][]string) (*DB, []models.Job) {
+	titleJobs := make(map[string][]models.Job)
+	jobs := make([]models.Job, 0)
 	var db DB
 	if len(lines) == 0 {
-		return &db
+		return &db, nil
 	}
 
 	for i, line := range lines {
@@ -101,7 +106,7 @@ func loadTitleJobs(lines [][]string) *DB {
 			Longitude: longitude,
 			Latitude:  latitude,
 		}
-
+		jobs = append(jobs, job)
 		// check that map contains jobs with same title,
 		// else initialize new slice for jobs with job.Title
 		//
@@ -110,15 +115,15 @@ func loadTitleJobs(lines [][]string) *DB {
 		// Ensure also that job title search queries are converted
 		// to lower case before using on titleJobs
 		lowercasedTitle := strings.ToLower(job.Title)
-		if sameJobs, ok := jobs[lowercasedTitle]; ok {
+		if sameJobs, ok := titleJobs[lowercasedTitle]; ok {
 			sameJobs = append(sameJobs, job)
-			jobs[lowercasedTitle] = sameJobs
+			titleJobs[lowercasedTitle] = sameJobs
 		} else {
-			jobs[lowercasedTitle] = []models.Job{job}
+			titleJobs[lowercasedTitle] = []models.Job{job}
 		}
 
 	}
 
-	db.titleJobs = jobs
-	return &db
+	db.titleJobs = titleJobs
+	return &db, jobs
 }

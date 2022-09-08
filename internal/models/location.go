@@ -5,8 +5,8 @@ import "fmt"
 // Location is a 2D representation of a place
 // on a map
 type Location struct {
-	Longitude float64
-	Latitude  float64
+	Longitude float64 `json:"longitude"`
+	Latitude  float64 `json:"latitude"`
 }
 
 // String represents this Location as a string of Longitude,Latitude

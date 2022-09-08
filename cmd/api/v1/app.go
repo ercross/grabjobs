@@ -9,17 +9,14 @@ import (
 )
 
 type repository interface {
-	// SearchJobsByTitle searches job by job title.
-	// Can return only an internal error.
-	// If no models.Job.Title matches title,
-	// an empty jobs slice is returned
-	SearchJobsByTitle(title string) ([]models.Job, error)
+	// TitleJobs fetches a mapping of title to available jobs
+	TitleJobs() (map[string][]models.Job, error)
 
 	// FindJobsNearby finds jobs within radius of location.
 	// If radius is zero, a default radius of 5km is used.
 	// FindJobsNearby returns an empty slice if no job is found within radius of location.
 	// Any error returned is an internal error
-	FindJobsNearby(location models.Location, radius float32) ([]models.Job, error)
+	FindJobsNearby(location models.Location, radius float64) ([]models.Job, error)
 
 	// SearchJobsByTitleAndLocation finds jobs matching title within 5km
 	// radius of location.

@@ -66,8 +66,10 @@ func (nod *node) isLeaf() bool {
 	return len(nod.children) == 0
 }
 
-// findMBRNeedingLeastExpansion finds the node whose node.mbr needs the least
-// expansion to accommodate new location.
+// findMBRNeedingLeastExpansion naively finds the node whose node.mbr needs the least
+// expansion toAccommodate new location.
+// Note that this implementation is a naive implementation and should be reimplemented
+// by combining mbr area property and set unionism.
 // Note that len(node.children) must be greater than zero
 func (nod *node) findMBRNeedingLeastExpansion(toAccommodate models.Location) *node {
 	if len(nod.children) == 0 {
@@ -83,18 +85,25 @@ func (nod *node) findMBRNeedingLeastExpansion(toAccommodate models.Location) *no
 
 	// obtain nodes needing least latitude and longitude expansions
 	var leastLatitude, leastLongitude *node
+
 	for _, childNode := range nod.children {
 
-		// check if toAccomodate can fit into this child node
-		// todo complete below
-		//if childNode.mbr.longitudeLowerBound <= toAccommodate.Longitude <= childNode.mbr.longitudeUpperBound
+		// check if toAccomodate can fit directly into this child node
+		if childNode.mbr.longitudeLowerBound <= toAccommodate.Longitude &&
+			toAccommodate.Longitude <= childNode.mbr.longitudeUpperBound &&
+			childNode.mbr.latitudeLowerBound <= toAccommodate.Latitude &&
+			toAccommodate.Latitude <= childNode.mbr.latitudeUpperBound {
 
+			return childNode
+		}
+
+		// check how location toAccommodate will cause childNode to expand in all directions
 		expansionDownwards := childNode.mbr.longitudeLowerBound - toAccommodate.Longitude
 		expansionUpwards := childNode.mbr.longitudeUpperBound - toAccommodate.Longitude
 		expansionRightwards := childNode.mbr.latitudeUpperBound - toAccommodate.Latitude
 		expansionLeftwards := childNode.mbr.latitudeLowerBound - toAccommodate.Latitude
 
-		// initialized in case any opposite sides are equal
+		// initialized to arbitrary values in case any opposite sides are equal
 		leastLongitudeExpansion, leastLatitudeExpansion := expansionUpwards, expansionRightwards
 
 		// check for least expansion on longitude
@@ -111,20 +120,28 @@ func (nod *node) findMBRNeedingLeastExpansion(toAccommodate models.Location) *no
 			leastLatitudeExpansion = expansionRightwards
 		}
 
-		// check for
+		// compare this childNode.mbr longitudinal expansion to existing nodes needing
+		// the least longitudinal expansion i.e., leastLongitude
 		if leastLongitudeExpansion < math.Abs(leastLongitude.mbr.longitudeLowerBound) ||
 			leastLongitudeExpansion < math.Abs(leastLongitude.mbr.longitudeUpperBound) {
 			leastLongitude = childNode
 		}
 
+		// compare this childNode.mbr latitude expansion to existing nodes needing
+		// the least latitude expansion i.e., leastLatitude
 		if leastLatitudeExpansion < math.Abs(leastLatitude.mbr.latitudeLowerBound) ||
 			leastLatitudeExpansion < math.Abs(leastLatitude.mbr.latitudeUpperBound) {
 			leastLatitude = childNode
 		}
 	}
 
+	// if nodes needing leastLatitude expansion and leastLongitude expansion
+	// both points to the same node, return either
 	if leastLatitude == leastLongitude {
 		return leastLongitude
 	}
-	return nil // todo
+
+	// check which of leastLatitude and leastLongitude needs the least expansion
+	// on both their adjacent side
+	return leastLatitude
 }

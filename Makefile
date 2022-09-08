@@ -1,7 +1,7 @@
 # Makefile for development
 BINARY_DIR=bin
 BINARY_NAME=grabjobs
-PORT=4045
+PORT=4046
 LOCATION_DATA=res/location_data.csv
 
 clean_binary:

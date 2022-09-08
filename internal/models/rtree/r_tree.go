@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/ercross/grabjobs/internal/models"
 	"math"
+	"math/rand"
 )
 
 const maxEntriesPerNode = 30
@@ -24,6 +25,8 @@ type RTree struct {
 	// root node may be a leaf if its the only node on the tree.
 	// RTree property:: If root is not a leaf, then it must have at least 2 children
 	root *node
+
+	raw []models.Job
 }
 
 // NewWithEntry initializes a new node with an entry
@@ -44,10 +47,12 @@ func NewWithEntry(entry models.Job) *RTree {
 }
 
 func NewWithEntries(entries ...models.Job) (*RTree, error) {
+
 	if len(entries) == 0 {
 		return nil, errors.New("cannot initialize tree with empty entries")
 	}
 	tree := NewWithEntry(entries[0])
+	tree.raw = entries
 	for _, entry := range entries[1:] {
 		tree.Insert(entry)
 	}
@@ -57,16 +62,19 @@ func NewWithEntries(entries ...models.Job) (*RTree, error) {
 // Insert a new job into the tree.
 // New index records are added at the leaves and nodes that overflow(i.e., len(node.children)>M) are split.
 func (tree *RTree) Insert(entry models.Job) {
-	leaf := tree.chooseLeaf()
+	leaf := tree.chooseLeaf(entry.Location)
 	if leaf.hasEntrySpace() {
 		leaf.insertNewEntry(entry)
 	} else {
-		newNode := leaf.split()
+		// todo
 	}
 }
 
-func (tree *RTree) FindJobs(within models.Distance) *[]models.Job {
-	return nil
+// FindJobs finds job within the distance of location specified by @of.
+func (tree *RTree) FindJobs(within models.Distance, of models.Location) []models.Job {
+	// todo implementation of tree is currently incomplete
+	r := rand.Intn(len(tree.raw))
+	return tree.raw[(r - 10):(r - 1)]
 }
 
 func (tree *RTree) chooseLeaf(location models.Location) *node {
@@ -78,7 +86,8 @@ func (tree *RTree) chooseLeaf(location models.Location) *node {
 
 	// else choose the root node of a subtree inside tree.root
 	// whose mbr needs the least expansion to accommodate location
-
+	// todo
+	return nil
 }
 
 // satisfiesHeightConstraints checks that tree height satisfies the height constraint

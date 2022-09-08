@@ -8,4 +8,4 @@ RUN mkdir "bin"
 
 RUN go build -o ./bin/grabjobs ./cmd/api/*.go
 
-EXPOSE 4045
+EXPOSE 4046

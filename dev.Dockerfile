@@ -6,6 +6,6 @@ WORKDIR /app
 
 COPY . /app
 
-EXPOSE 4045
+EXPOSE 4046
 
 CMD ["make", "run_app"]

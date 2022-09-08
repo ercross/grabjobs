@@ -39,6 +39,7 @@ func (app *App) sendJSONResponse(args *responseWriterArgs, data interface{}) {
 	}
 
 	args.writer.Header().Add("Content-Type", "application/json")
+	args.writer.Header().Add("Access-Control-Allow-Origin", "*")
 	_, err = args.writer.Write(apiResponse)
 	if err != nil {
 		args.writer.WriteHeader(500)
@@ -70,6 +71,7 @@ func (app *App) sendJSONErrorResponse(w http.ResponseWriter, status int, message
 	// set header values and send
 	w.WriteHeader(status)
 	w.Header().Add("Content-Type", "application/json")
+	w.Header().Add("Access-Control-Allow-Origin", "*")
 	_, err = w.Write(apiResponse)
 	if err != nil {
 		w.WriteHeader(500)

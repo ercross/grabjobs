@@ -26,25 +26,19 @@ func Routes(repo repository) http.Handler {
 func (app *App) jobsRouter() chi.Router {
 	router := chi.NewRouter()
 
-	router.Get("/{title}", app.getJobsByTitle)
-	router.Get("/around-me", app.getJobsAround)
+	router.Get("/available", app.getTitleJobs)
+	router.Get("/nearby", app.getJobsNearby)
 	router.Get("/top-jobs/around-me", app.getTopTitleJobsAround)
 	return router
 }
 
-// getJobsByTitle fetches job matching the placeholder {title}
+// getTitleJobs fetches a mapping of title to available jobs
 // Request Method: GET
 // Query Parameters: None
 // Response Type: application/json
-func (app *App) getJobsByTitle(w http.ResponseWriter, r *http.Request) {
-	title := chi.URLParam(r, "title")
-	if notValidString(title) {
-		fmt.Println("Got this bad title ", title)
-		app.sendFailedValidationResponse(w, map[string]string{"title": "title is not a valid text"})
-		return
-	}
+func (app *App) getTitleJobs(w http.ResponseWriter, r *http.Request) {
 
-	jobs, err := app.repo.SearchJobsByTitle(title)
+	jobs, err := app.repo.TitleJobs()
 	if err != nil {
 		app.sendServerErrorResponse(w, fmt.Errorf("error searching jobs by title: %v", err))
 		return
@@ -54,11 +48,11 @@ func (app *App) getJobsByTitle(w http.ResponseWriter, r *http.Request) {
 		writer:     w,
 		statusCode: 200,
 		status:     true,
-		message:    fmt.Sprintf("%v jobs", title),
+		message:    "Available jobs",
 	}, jobs)
 }
 
-// getJobsAround fetches jobs some radius around current location
+// getJobsNearby fetches jobs some radius around current location
 // Request Method: GET
 // Query Parameters:
 //
@@ -67,7 +61,7 @@ func (app *App) getJobsByTitle(w http.ResponseWriter, r *http.Request) {
 //	radius 		decimal/float
 //
 // Response Type: application/json
-func (app *App) getJobsAround(w http.ResponseWriter, r *http.Request) {
+func (app *App) getJobsNearby(w http.ResponseWriter, r *http.Request) {
 
 	// read query paramters
 	latitude, err := strconv.ParseFloat(r.URL.Query().Get("latitude"), 32)
@@ -91,7 +85,7 @@ func (app *App) getJobsAround(w http.ResponseWriter, r *http.Request) {
 	jobs, err := app.repo.FindJobsNearby(models.Location{
 		Longitude: longitude,
 		Latitude:  latitude,
-	}, float32(radius))
+	}, radius)
 
 	if err != nil {
 		app.sendServerErrorResponse(w, fmt.Errorf("error encountered finding jobs within a radius of %f", radius))
@@ -131,7 +125,7 @@ func (app *App) getTopTitleJobsAround(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	title := chi.URLParam(r, "title")
+	title := r.URL.Query().Get("title")
 	if notValidString(title) {
 		app.sendFailedValidationResponse(w, map[string]string{"title": "title is not a valid text"})
 		return

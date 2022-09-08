@@ -22,7 +22,7 @@ func main() {
 
 func initConfig() current.Config {
 	var config current.Config
-	flag.IntVar(&config.Port, "port", 4042, "port the server listens on")
+	flag.IntVar(&config.Port, "port", 4046, "port the server listens on")
 	flag.StringVar(&config.LocationDataFilePath, "db", "empty", "api endpoint")
 	flag.Parse()
 	return config

@@ -4,7 +4,7 @@ services:
       context: "./"
       dockerfile: "dev.Dockerfile"
     ports:
-      - "4045:4045"
+      - "4046:4046"
     volumes:
       - ./cmd:/app/cmd
       - ./internal:/app/internal
@@ -22,7 +22,7 @@ services:
       #context: "./"
       #dockerfile: "prod.Dockerfile"
     ports:
-      - "4045:4045"
-    entrypoint: ./bin/grabjobs -port 4045 -db 'res/location_data.csv'
+      - "4046:4046"
+    entrypoint: ./bin/grabjobs -port 4046 -db 'res/location_data.csv'
     profiles:
       - production
