@@ -17,7 +17,7 @@ func (d *DB) FindJobsNearby(center models.Location, radius float64) ([]models.Jo
 	jobs := d.index.FindJobs(models.Distance{
 		Unit:  models.Kilometer,
 		Value: radius,
-	}, center)
+	}, center, d.titleJobs)
 	d.lock.RUnlock()
 	return jobs, nil
 }
@@ -27,7 +27,7 @@ func (d *DB) SearchJobsByTitleAndLocation(title string, location models.Location
 	jobs := d.index.FindJobs(models.Distance{
 		Unit:  models.Kilometer,
 		Value: 5,
-	}, location)
+	}, location, d.titleJobs)
 	d.lock.RUnlock()
 	titleJobs := make([]models.Job, 0)
 	for _, job := range jobs {

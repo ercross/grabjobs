@@ -39,9 +39,9 @@ func Initialize(filepath string) (*DB, error) {
 		return nil, fmt.Errorf("error encountered reading file on path %s : %v", filepath, err)
 	}
 
-	db, jobs := loadTitleJobs(removeTitleLine(lines))
+	db, _ := loadTitleJobs(removeTitleLine(lines))
 	db.lock = new(sync.RWMutex)
-	db.index, _ = rtree.NewWithEntries(jobs...)
+
 	return db, nil
 }
 
