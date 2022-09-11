@@ -88,7 +88,7 @@ func (tree *RTree) FindJobs(within models.Distance, center models.Location, d ma
 		Location: center,
 	}
 	entry := NewEntry(job)
-
+	return search(within, center, d)
 	jobs := make([]models.Job, 0)
 	if !entry.mbr.canFitWithin(tree.root.mbr) {
 		return jobs

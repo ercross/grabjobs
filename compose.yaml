@@ -18,9 +18,9 @@ services:
 
     # uncomment build to build image locally
     # https://docs.docker.com/compose/compose-file/#pull_policy
-    #build:
-      #context: "./"
-      #dockerfile: "prod.Dockerfile"
+    build:
+      context: "./"
+      dockerfile: "prod.Dockerfile"
     ports:
       - "4046:4046"
     entrypoint: ./bin/grabjobs -port 4046 -db 'res/location_data.csv'
