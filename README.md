@@ -1,3 +1,5 @@
+A take-home assignment on my application to GrabJobs
+
 ## Implemented Features
 1.  "find jobs nearby" feature based on user location (result : please show the job title from attached job titles document)
 2.  Map (choice of yours eg. open map, google map, etc..) with place marker for given coordinates (latitude and longitude)
